@@ -34,3 +34,7 @@ Desktop.ini
 
 # Docker override local
 docker-compose.override.yml
+
+# Publish profiles do Azure — nunca versionar
+.azure-secrets/
+*.PublishSettings

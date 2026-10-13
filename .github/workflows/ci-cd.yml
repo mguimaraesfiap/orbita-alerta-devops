@@ -90,6 +90,19 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_STAGING_PUBLISH_PROFILE }}
           images: ${{ needs.container.outputs.image }}
 
+      - name: Smoke test (staging)
+        run: |
+          url="https://${{ secrets.AZURE_WEBAPP_STAGING }}.azurewebsites.net"
+          for i in $(seq 1 30); do
+            if curl --fail --silent --show-error "$url/health"; then
+              echo; echo "staging saudável em $url"
+              curl --fail --silent --show-error "$url/api/alerts" > /dev/null
+              exit 0
+            fi
+            echo "Tentativa $i: aguardando a aplicação iniciar..."; sleep 10
+          done
+          exit 1
+
   deploy-production:
     name: Deploy production
     needs: container
@@ -104,4 +117,17 @@ jobs:
           app-name: ${{ secrets.AZURE_WEBAPP_PRODUCTION }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PRODUCTION_PUBLISH_PROFILE }}
           images: ${{ needs.container.outputs.image }}
+
+      - name: Smoke test (production)
+        run: |
+          url="https://${{ secrets.AZURE_WEBAPP_PRODUCTION }}.azurewebsites.net"
+          for i in $(seq 1 30); do
+            if curl --fail --silent --show-error "$url/health"; then
+              echo; echo "production saudável em $url"
+              curl --fail --silent --show-error "$url/api/alerts" > /dev/null
+              exit 0
+            fi
+            echo "Tentativa $i: aguardando a aplicação iniciar..."; sleep 10
+          done
+          exit 1
 
