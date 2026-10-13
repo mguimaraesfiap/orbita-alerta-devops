@@ -125,6 +125,7 @@ Capturas reais de janelas do Windows PowerShell, geradas por [scripts/collect-ev
 
 ![GitHub Actions](docs/evidencias/prints/10-github-actions.png)
 ![GitHub Actions - página do run](docs/evidencias/prints/11-github-actions-web.png)
+![Secrets do repositório](docs/evidencias/prints/12-github-secrets.png)
 
 ### Docker Compose
 

@@ -173,6 +173,7 @@ story += [P("4. Evidências: pipeline (build, testes e deploy)", "H1x"),
 story += shot("01-dotnet-build", "Figura 1 — Restore e build Release da API.")
 story += shot("02-dotnet-test", "Figura 2 — Testes automatizados xUnit: 3 de 3 aprovados.")
 story += shot("10-github-actions", "Figura 3 — Execuções do workflow no GitHub Actions e status de cada job por branch (qa → staging, main → produção).")
+story += shot("12-github-secrets", "Figura 3c — Secrets do Azure cadastrados no repositório GitHub (valores criptografados, não exibidos).")
 story += shot("11-github-actions-web", "Figura 3b — Página pública do último run no GitHub Actions.")
 story += shot("03-docker-compose-up", "Figura 4 — Build da imagem multi-stage e subida dos containers com Docker Compose.")
 story += shot("04-docker-compose-ps", "Figura 5 — Containers em execução, imagem criada, volumes e rede.")
