@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: orbita-alerta-api:local
+    container_name: orbita-alerta-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      MONGO_CONNECTION_STRING: ${MONGO_CONNECTION_STRING:-mongodb://admin:change-me@mongodb:27017/?authSource=admin}
+      MONGO_DATABASE: ${MONGO_DATABASE:-orbita_alerta_esg}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - orbita-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: orbita-alerta-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-change-me}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' --username $$MONGO_INITDB_ROOT_USERNAME --password $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - orbita-network
+
+volumes:
+  mongodb-data:
+    name: orbita-alerta-mongodb-data
+  mongodb-config:
+    name: orbita-alerta-mongodb-config
+
+networks:
+  orbita-network:
+    name: orbita-alerta-network
+    driver: bridge
+

@@ -1,0 +1,107 @@
+name: CI/CD - Orbita Alerta
+
+on:
+  pull_request:
+    branches: [develop, qa, main]
+  push:
+    branches: [develop, qa, main]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/orbita-alerta-api
+
+jobs:
+  build-test:
+    name: Build e testes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore src/OrbitaAlerta.Api/OrbitaAlerta.Api.csproj && dotnet restore tests/OrbitaAlerta.Api.Tests/OrbitaAlerta.Api.Tests.csproj
+
+      - name: Build
+        run: dotnet build src/OrbitaAlerta.Api/OrbitaAlerta.Api.csproj --configuration Release --no-restore
+
+      - name: Testes automatizados
+        run: dotnet test tests/OrbitaAlerta.Api.Tests/OrbitaAlerta.Api.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+
+      - name: Publicar resultados de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tests/**/TestResults
+
+  container:
+    name: Build e publicação da imagem
+    needs: build-test
+    if: github.event_name == 'push' && (github.ref_name == 'qa' || github.ref_name == 'main')
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Definir imagem
+        id: image
+        run: echo "image=${IMAGE_NAME}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build e push Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.IMAGE_NAME }}:${{ github.ref_name }}-latest
+
+  deploy-staging:
+    name: Deploy staging
+    needs: container
+    if: github.event_name == 'push' && github.ref_name == 'qa'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - name: Deploy no Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_STAGING }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_STAGING_PUBLISH_PROFILE }}
+          images: ${{ needs.container.outputs.image }}
+
+  deploy-production:
+    name: Deploy production
+    needs: container
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Deploy no Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_PRODUCTION }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PRODUCTION_PUBLISH_PROFILE }}
+          images: ${{ needs.container.outputs.image }}
+

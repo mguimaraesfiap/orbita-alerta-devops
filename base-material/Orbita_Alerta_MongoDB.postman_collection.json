@@ -1,0 +1,615 @@
+{
+  "info": {
+    "_postman_id": "5c0198c0-9324-4c61-8a5b-7f0a1e2d3c4b",
+    "name": "Órbita Alerta - MongoDB CRUD",
+    "description": "Collection acadêmica do projeto Órbita Alerta. Ela representa os testes HTTP de uma camada REST que persiste em MongoDB. Para criação das collections, inserts e CRUD diretamente no MongoDB, use o arquivo orbita_alerta_mongodb.js no mongosh ou MongoDB Compass.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Informações",
+      "item": [
+        {
+          "name": "Health check da API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "A collection Postman testa uma API REST que persiste os dados no MongoDB. Postman não executa comandos mongosh diretamente; os comandos de banco estão no arquivo orbita_alerta_mongodb.js."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "usuarios",
+      "item": [
+        {
+          "name": "CREATE - usuarios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"usr-postman\",\n  \"nome\": \"Usuário Postman\",\n  \"email\": \"postman@orbitaalerta.local\",\n  \"perfil\": \"morador\",\n  \"cidade\": \"Guarulhos\",\n  \"uf\": \"SP\",\n  \"canaisNotificacao\": [\n    \"push\"\n  ],\n  \"preferencias\": {\n    \"alertasCriticos\": true\n  },\n  \"criadoEm\": \"2026-09-08T21:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            },
+            "description": "Cria um documento temporário na collection usuarios."
+          },
+          "response": []
+        },
+        {
+          "name": "READ - usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/usr-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "usr-postman"
+              ]
+            },
+            "description": "Consulta o documento usr-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE - usuarios",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferencias\": {\n    \"alertasCriticos\": true,\n    \"raioPadraoKm\": 8\n  },\n  \"cidade\": \"Guarulhos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/usr-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "usr-postman"
+              ]
+            },
+            "description": "Atualiza o documento usr-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - usuarios",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/usr-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "usr-postman"
+              ]
+            },
+            "description": "Remove o documento temporário usr-postman."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "areas_monitoradas",
+      "item": [
+        {
+          "name": "CREATE - areas_monitoradas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"area-postman\",\n  \"usuarioId\": \"usr-postman\",\n  \"nome\": \"Área Postman\",\n  \"categoria\": \"casa\",\n  \"localizacao\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -46.5333,\n      -23.4543\n    ]\n  },\n  \"raioKm\": 5,\n  \"riscosMonitorados\": [\n    \"enchente\"\n  ],\n  \"ativa\": true,\n  \"criadoEm\": \"2026-09-08T21:01:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/areas_monitoradas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "areas_monitoradas"
+              ]
+            },
+            "description": "Cria um documento temporário na collection areas_monitoradas."
+          },
+          "response": []
+        },
+        {
+          "name": "READ - areas_monitoradas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/areas_monitoradas/area-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "areas_monitoradas",
+                "area-postman"
+              ]
+            },
+            "description": "Consulta o documento area-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE - areas_monitoradas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"raioKm\": 8,\n  \"riscosMonitorados\": [\n    \"enchente\",\n    \"queimada\"\n  ],\n  \"ativa\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/areas_monitoradas/area-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "areas_monitoradas",
+                "area-postman"
+              ]
+            },
+            "description": "Atualiza o documento area-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - areas_monitoradas",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/areas_monitoradas/area-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "areas_monitoradas",
+                "area-postman"
+              ]
+            },
+            "description": "Remove o documento temporário area-postman."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "observacoes_ambientais",
+      "item": [
+        {
+          "name": "CREATE - observacoes_ambientais",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"obs-postman\",\n  \"areaId\": \"area-postman\",\n  \"tipo\": \"enchente\",\n  \"fonte\": \"postman\",\n  \"capturadoEm\": \"2026-09-08T21:02:00Z\",\n  \"localizacao\": {\n    \"type\": \"Point\",\n    \"coordinates\": [\n      -46.5333,\n      -23.4543\n    ]\n  },\n  \"indicadores\": {\n    \"precipitacaoMm24h\": 88.4,\n    \"nivelRioM\": 3.7,\n    \"cotaAlertaM\": 3.5\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/observacoes_ambientais",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "observacoes_ambientais"
+              ]
+            },
+            "description": "Cria um documento temporário na collection observacoes_ambientais."
+          },
+          "response": []
+        },
+        {
+          "name": "READ - observacoes_ambientais",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/observacoes_ambientais/obs-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "observacoes_ambientais",
+                "obs-postman"
+              ]
+            },
+            "description": "Consulta o documento obs-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE - observacoes_ambientais",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"processamentoIA\": {\n    \"revisado\": true,\n    \"score\": 0.91\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/observacoes_ambientais/obs-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "observacoes_ambientais",
+                "obs-postman"
+              ]
+            },
+            "description": "Atualiza o documento obs-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - observacoes_ambientais",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/observacoes_ambientais/obs-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "observacoes_ambientais",
+                "obs-postman"
+              ]
+            },
+            "description": "Remove o documento temporário obs-postman."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "alertas",
+      "item": [
+        {
+          "name": "CREATE - alertas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"alt-postman\",\n  \"areaId\": \"area-postman\",\n  \"observacaoId\": \"obs-postman\",\n  \"tipo\": \"enchente\",\n  \"severidade\": \"alta\",\n  \"status\": \"ativo\",\n  \"titulo\": \"Alerta Postman\",\n  \"mensagem\": \"Alerta criado para demonstrar a operação HTTP.\",\n  \"recomendacoes\": [\n    \"Evitar áreas alagáveis\"\n  ],\n  \"geradoEm\": \"2026-09-08T21:03:00Z\",\n  \"notificadoPara\": [\n    \"usr-postman\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas"
+              ]
+            },
+            "description": "Cria um documento temporário na collection alertas."
+          },
+          "response": []
+        },
+        {
+          "name": "READ - alertas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/alt-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "alt-postman"
+              ]
+            },
+            "description": "Consulta o documento alt-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE - alertas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolvido\",\n  \"resolvidoEm\": \"2026-09-08T21:20:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/alt-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "alt-postman"
+              ]
+            },
+            "description": "Atualiza o documento alt-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - alertas",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/alt-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "alt-postman"
+              ]
+            },
+            "description": "Remove o documento temporário alt-postman."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ocorrencias_gestao",
+      "item": [
+        {
+          "name": "CREATE - ocorrencias_gestao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"_id\": \"oco-postman\",\n  \"alertaId\": \"alt-postman\",\n  \"tipo\": \"enchente\",\n  \"prioridade\": 2,\n  \"status\": \"aberta\",\n  \"orgaoResponsavel\": \"Defesa Civil\",\n  \"abertoEm\": \"2026-09-08T21:04:00Z\",\n  \"historicoAcoes\": [\n    {\n      \"em\": \"2026-09-08T21:04:00Z\",\n      \"acao\": \"Ocorrência criada pelo Postman\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ocorrencias_gestao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ocorrencias_gestao"
+              ]
+            },
+            "description": "Cria um documento temporário na collection ocorrencias_gestao."
+          },
+          "response": []
+        },
+        {
+          "name": "READ - ocorrencias_gestao",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ocorrencias_gestao/oco-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ocorrencias_gestao",
+                "oco-postman"
+              ]
+            },
+            "description": "Consulta o documento oco-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE - ocorrencias_gestao",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolvida\",\n  \"fechadoEm\": \"2026-09-08T21:25:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ocorrencias_gestao/oco-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ocorrencias_gestao",
+                "oco-postman"
+              ]
+            },
+            "description": "Atualiza o documento oco-postman."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - ocorrencias_gestao",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ocorrencias_gestao/oco-postman",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ocorrencias_gestao",
+                "oco-postman"
+              ]
+            },
+            "description": "Remove o documento temporário oco-postman."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "database",
+      "value": "orbita_alerta_esg",
+      "type": "string"
+    }
+  ]
+}

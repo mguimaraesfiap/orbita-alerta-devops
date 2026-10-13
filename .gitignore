@@ -1,0 +1,36 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDEs
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+
+# Ambiente local — nunca versionar
+.env
+
+# Cobertura e resultados de testes
+coverage/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Pacotes NuGet locais
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Docker override local
+docker-compose.override.yml
