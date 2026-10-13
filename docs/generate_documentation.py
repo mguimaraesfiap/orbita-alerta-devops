@@ -1,50 +1,66 @@
+"""Gera docs/Orbita-Alerta-DevOps-Documentacao.pdf com os prints de docs/evidencias/prints.
+
+Uso (na raiz do projeto): python docs/generate_documentation.py
+Os prints são gerados antes por: powershell -ExecutionPolicy Bypass -File scripts/collect-evidence.ps1
+"""
+import datetime
+import os
+from pathlib import Path
+
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import (
-    BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, Preformatted, KeepTogether
-)
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (
+    BaseDocTemplate, Frame, Image, KeepTogether, PageBreak, PageTemplate, Paragraph,
+    Preformatted, Spacer, Table, TableStyle,
+)
 
-
-OUT = "docs/Orbita-Alerta-DevOps-Documentacao.pdf"
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "docs/Orbita-Alerta-DevOps-Documentacao.pdf"
+PRINTS = ROOT / "docs/evidencias/prints"
+TERMINAL = ROOT / "docs/evidencias/terminal"
 PAGE_W, PAGE_H = A4
 GREEN = colors.HexColor("#0B6B57")
 DARK = colors.HexColor("#18323C")
 LIGHT = colors.HexColor("#EAF4F1")
-ORANGE = colors.HexColor("#D98528")
 GRAY = colors.HexColor("#5B6870")
 
-pdfmetrics.registerFont(TTFont("DejaVu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
-pdfmetrics.registerFont(TTFont("DejaVu-Bold", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"))
-pdfmetrics.registerFont(TTFont("DejaVu-Mono", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
+WIN_FONTS = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts"
+FONT_FILES = {
+    "Body": [WIN_FONTS / "segoeui.ttf", Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")],
+    "Body-Bold": [WIN_FONTS / "segoeuib.ttf", Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")],
+    "Mono": [WIN_FONTS / "consola.ttf", Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")],
+    "Sym": [WIN_FONTS / "seguisym.ttf", Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")],
+}
+for name, candidates in FONT_FILES.items():
+    pdfmetrics.registerFont(TTFont(name, str(next(p for p in candidates if p.exists()))))
 
 
-class NumberedCanvasMixin:
-    def on_page(self, canvas, doc):
-        canvas.saveState()
-        canvas.setStrokeColor(colors.HexColor("#D8E2E0"))
-        canvas.line(1.7 * cm, 1.35 * cm, PAGE_W - 1.7 * cm, 1.35 * cm)
-        canvas.setFont("DejaVu", 8)
-        canvas.setFillColor(GRAY)
-        canvas.drawString(1.7 * cm, 0.85 * cm, "Órbita Alerta | DevOps | FIAP")
-        canvas.drawRightString(PAGE_W - 1.7 * cm, 0.85 * cm, f"Página {doc.page}")
-        canvas.restoreState()
+def on_page(canvas, doc):
+    canvas.saveState()
+    canvas.setStrokeColor(colors.HexColor("#D8E2E0"))
+    canvas.line(1.7 * cm, 1.35 * cm, PAGE_W - 1.7 * cm, 1.35 * cm)
+    canvas.setFont("Body", 8)
+    canvas.setFillColor(GRAY)
+    canvas.drawString(1.7 * cm, 0.85 * cm, "Cidades ESG Inteligentes | Órbita Alerta | DevOps | FIAP")
+    canvas.drawRightString(PAGE_W - 1.7 * cm, 0.85 * cm, f"Página {doc.page}")
+    canvas.restoreState()
 
 
 styles = getSampleStyleSheet()
-styles.add(ParagraphStyle(name="CoverTitle", parent=styles["Title"], fontName="DejaVu-Bold", fontSize=27, leading=32, textColor=DARK, alignment=TA_CENTER, spaceAfter=16))
-styles.add(ParagraphStyle(name="CoverSub", parent=styles["Normal"], fontName="DejaVu", fontSize=13, leading=19, textColor=GREEN, alignment=TA_CENTER, spaceAfter=10))
-styles.add(ParagraphStyle(name="H1x", parent=styles["Heading1"], fontName="DejaVu-Bold", fontSize=18, leading=22, textColor=DARK, spaceBefore=8, spaceAfter=10))
-styles.add(ParagraphStyle(name="H2x", parent=styles["Heading2"], fontName="DejaVu-Bold", fontSize=12, leading=15, textColor=GREEN, spaceBefore=9, spaceAfter=6))
-styles.add(ParagraphStyle(name="Bodyx", parent=styles["BodyText"], fontName="DejaVu", fontSize=9.5, leading=14, textColor=DARK, spaceAfter=7))
-styles.add(ParagraphStyle(name="Smallx", parent=styles["BodyText"], fontName="DejaVu", fontSize=8, leading=11, textColor=GRAY, spaceAfter=5))
-styles.add(ParagraphStyle(name="Callout", parent=styles["BodyText"], fontName="DejaVu-Bold", fontSize=10, leading=14, textColor=GREEN, backColor=LIGHT, borderPadding=8, spaceBefore=5, spaceAfter=10))
-styles.add(ParagraphStyle(name="Codex", parent=styles["Code"], fontName="DejaVu-Mono", fontSize=7.5, leading=10, textColor=colors.HexColor("#233238"), backColor=colors.HexColor("#F3F6F5"), borderPadding=7, leftIndent=5, rightIndent=5, spaceBefore=4, spaceAfter=8))
+styles.add(ParagraphStyle(name="CoverTitle", fontName="Body-Bold", fontSize=27, leading=32, textColor=DARK, alignment=TA_CENTER, spaceAfter=14))
+styles.add(ParagraphStyle(name="CoverSub", fontName="Body", fontSize=13, leading=19, textColor=GREEN, alignment=TA_CENTER, spaceAfter=10))
+styles.add(ParagraphStyle(name="H1x", fontName="Body-Bold", fontSize=17, leading=22, textColor=DARK, spaceBefore=6, spaceAfter=9))
+styles.add(ParagraphStyle(name="H2x", fontName="Body-Bold", fontSize=12, leading=15, textColor=GREEN, spaceBefore=8, spaceAfter=5))
+styles.add(ParagraphStyle(name="Bodyx", fontName="Body", fontSize=9.5, leading=14, textColor=DARK, spaceAfter=6))
+styles.add(ParagraphStyle(name="Smallx", fontName="Body", fontSize=8, leading=11, textColor=GRAY, spaceAfter=4))
+styles.add(ParagraphStyle(name="Caption", fontName="Body", fontSize=8, leading=11, textColor=GRAY, alignment=TA_CENTER, spaceBefore=3, spaceAfter=10))
+styles.add(ParagraphStyle(name="Callout", fontName="Body-Bold", fontSize=9.5, leading=14, textColor=GREEN, backColor=LIGHT, borderPadding=8, spaceBefore=5, spaceAfter=10))
+styles.add(ParagraphStyle(name="Codex", fontName="Mono", fontSize=7.5, leading=10, textColor=colors.HexColor("#233238"), backColor=colors.HexColor("#F3F6F5"), borderPadding=7, leftIndent=5, rightIndent=5, spaceBefore=4, spaceAfter=8))
 
 
 def P(text, style="Bodyx"):
@@ -52,81 +68,152 @@ def P(text, style="Bodyx"):
 
 
 def bullet(text):
-    return P(f"• {text}", "Bodyx")
+    return P(f"• {text}")
 
 
 def table(data, widths, header=True):
-    t = Table(data, colWidths=widths, repeatRows=1 if header else 0, hAlign="LEFT")
-    commands = [
+    rows = [[P(c, "Smallx" if header and i == 0 else "Bodyx") if isinstance(c, str) else c for c in row] for i, row in enumerate(data)]
+    t = Table(rows, colWidths=widths, repeatRows=1 if header else 0, hAlign="LEFT")
+    cmds = [
         ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#C9D8D4")),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 6),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
     ]
     if header:
-        commands += [("BACKGROUND", (0, 0), (-1, 0), GREEN), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold")]
-        if len(data) > 1:
-            commands.append(("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F4F8F7")]))
-    t.setStyle(TableStyle(commands))
+        cmds += [("BACKGROUND", (0, 0), (-1, 0), LIGHT), ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAF9")])]
+    t.setStyle(TableStyle(cmds))
     return t
 
 
-def flow_box(label, detail):
-    return Table([[P(f"<b>{label}</b><br/><font size=8>{detail}</font>", "Bodyx")]], colWidths=[4.1 * cm], rowHeights=[1.25 * cm], style=TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
-        ("BOX", (0, 0), (-1, -1), 0.8, GREEN),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 7),
-    ]))
+def shot(name, caption):
+    path = PRINTS / f"{name}.png"
+    if not path.exists():
+        return [P(f"[print ausente: {path.name}]", "Callout")]
+    img = Image(str(path))
+    max_w, max_h = PAGE_W - 3.4 * cm, PAGE_H - 6 * cm
+    scale = min(max_w / img.imageWidth, max_h / img.imageHeight)
+    img.drawWidth, img.drawHeight = img.imageWidth * scale, img.imageHeight * scale
+    return [KeepTogether([img, P(caption, "Caption")])]
 
 
+def pipeline_status():
+    """Lê a evidência do pipeline e indica se os deploys de staging e produção concluíram com sucesso."""
+    path = TERMINAL / "10-github-actions.txt"
+    text = path.read_text(encoding="utf-8-sig", errors="replace") if path.exists() else ""
+    ok = lambda job: any(job in line and "success" in line for line in text.splitlines())
+    return ok("Deploy staging"), ok("Deploy production")
+
+
+def check(ok):
+    return f'<font name="Sym">{"☑" if ok else "☐"}</font>'
+
+
+staging_ok, production_ok = pipeline_status()
+deploy_ok = staging_ok and production_ok
+today = datetime.date.today().strftime("%d/%m/%Y")
 story = []
 
-# Cover
-story += [Spacer(1, 2.6 * cm), P("PROJETO ESG + DEVOPS", "CoverSub"), P("Cidades ESG Inteligentes", "CoverTitle"), P("Órbita Alerta", "CoverTitle"), P("Documentação técnica da entrega", "CoverSub"), Spacer(1, 1.2 * cm)]
-story.append(table([[P("Objetivo", "Smallx"), P("Aplicar CI/CD, containerização e orquestração a uma API ESG executável.", "Bodyx")], [P("Integrante", "Smallx"), P("Micaela Guimarães — FIAP", "Bodyx")], [P("Stack", "Smallx"), P("C# / .NET 8, MongoDB, Docker Compose e GitHub Actions", "Bodyx")]], [3.2 * cm, 12.3 * cm], header=False))
-story += [Spacer(1, 1.3 * cm), P("Versão preparada em 27/09/2026", "Smallx"), PageBreak()]
+# Capa
+story += [Spacer(1, 2.4 * cm), P("PROJETO ESG + DEVOPS", "CoverSub"), P("Cidades ESG Inteligentes", "CoverTitle"),
+          P("Órbita Alerta", "CoverTitle"), P("Documentação técnica da entrega — Navegando pelo mundo DevOps", "CoverSub"), Spacer(1, 1 * cm)]
+story.append(table([
+    ["Integrante", "Micaela Guimarães — FIAP"],
+    ["Repositório", "github.com/mguimaraesfiap/orbita-alerta-devops"],
+    ["Staging", "https://orbita-alerta-staging-mg.azurewebsites.net"],
+    ["Produção", "https://orbita-alerta-production-mg.azurewebsites.net"],
+    ["Stack", "C# / .NET 8, MongoDB, Docker, Docker Compose, GitHub Actions, GHCR, Azure App Service e Azure Cosmos DB (API MongoDB)"],
+], [3.2 * cm, 14.4 * cm], header=False))
+story += [Spacer(1, 1 * cm), P(f"Documento gerado em {today}", "Smallx"), PageBreak()]
 
-# Context
-story += [P("1. Contexto e objetivo", "H1x"), P("O Órbita Alerta é uma solução ESG voltada ao registro de alertas ambientais, áreas monitoradas e ocorrências de gestão. Nesta etapa, o projeto foi adaptado para representar um ciclo de entrega mais próximo de um ambiente produtivo: o código possui API executável, persistência em MongoDB, testes automatizados, imagem Docker e fluxo de promoção entre staging e produção.")]
-story.append(P("A implementação foi preparada para execução real. As evidências de pipeline e de deploy externo não foram simuladas no documento: dependem da conexão do repositório às contas GitHub/Azure e da configuração dos secrets descritos no README.", "Callout"))
-story += [P("2. Arquitetura da solução", "H1x"), P("A arquitetura separa a aplicação da persistência e utiliza o mesmo artefato de imagem no processo de promoção. No ambiente local, Docker Compose cria a API e o MongoDB em uma rede dedicada, com volumes nomeados para preservar os dados.")]
-arch = [[flow_box("Desenvolvedor", "commit / pull request"), P("→", "CoverTitle"), flow_box("GitHub Actions", "build + testes"), P("→", "CoverTitle"), flow_box("GHCR", "imagem por SHA")], [P("", "Bodyx"), P("", "Bodyx"), P("↓", "CoverTitle"), P("", "Bodyx"), P("", "Bodyx")], [P("", "Bodyx"), P("", "Bodyx"), flow_box("staging", "Azure App Service"), P("→", "CoverTitle"), flow_box("production", "ambiente protegido")]]
-story.append(Table(arch, colWidths=[4.1 * cm, 1.0 * cm, 4.1 * cm, 1.0 * cm, 4.1 * cm], style=TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("ALIGN", (0, 0), (-1, -1), "CENTER"), ("SPAN", (2, 1), (2, 1))])))
-story += [Spacer(1, 8), P("Componentes principais", "H2x"), bullet("ASP.NET Core Minimal API em .NET 8, com endpoint de healthcheck e operações de consulta/criação de alertas."), bullet("MongoDB 7, collection alerts e conexão configurável por variável de ambiente."), bullet("Docker Compose com rede, volumes e healthcheck do banco."), bullet("GitHub Actions para integração contínua, publicação no GHCR e deploy em dois ambientes.")]
+# 1. Contexto
+story += [P("1. Contexto e objetivo", "H1x"),
+          P("O Órbita Alerta é uma API ESG para registro de alertas ambientais de cidades inteligentes. Nesta fase, o projeto C# foi adaptado para simular um ambiente de produção: build e testes automatizados, imagem Docker, orquestração com Docker Compose e deploy automatizado em dois ambientes na nuvem (staging e produção)."),
+          P("Endpoints: <b>GET /health</b> (estado da aplicação e ambiente), <b>GET /api/alerts</b> (lista alertas ordenados por data) e <b>POST /api/alerts</b> (cria alerta com validação de título, categoria, severidade e cidade).")]
 
-# Pipeline
-story += [P("3. Pipeline CI/CD", "H1x"), P("O workflow .github/workflows/ci-cd.yml é acionado em pull requests e pushes nas branches develop, qa e main. O pipeline foi dividido em jobs para deixar explícita a dependência entre qualidade, empacotamento e promoção.")]
-pipeline_rows = [[P("Job", "Smallx"), P("Quando", "Smallx"), P("Responsabilidade", "Smallx")], [P("build-test", "Bodyx"), P("PR e push", "Bodyx"), P("Restore, build Release, testes xUnit e upload dos resultados.", "Bodyx")], [P("container", "Bodyx"), P("push em qa/main", "Bodyx"), P("Login no GHCR, build da imagem e tags por SHA/branch.", "Bodyx")], [P("deploy-staging", "Bodyx"), P("push em qa", "Bodyx"), P("Deploy automático no ambiente staging.", "Bodyx")], [P("deploy-production", "Bodyx"), P("push em main", "Bodyx"), P("Deploy no ambiente production, sujeito à aprovação configurada no GitHub.", "Bodyx")]]
-story.append(table(pipeline_rows, [3.1 * cm, 3.5 * cm, 8.9 * cm]))
-story += [P("Secrets previstos", "H2x"), P("Os nomes dos Web Apps e os publish profiles são mantidos fora do código. O pipeline espera AZURE_WEBAPP_STAGING, AZURE_WEBAPP_STAGING_PUBLISH_PROFILE, AZURE_WEBAPP_PRODUCTION e AZURE_WEBAPP_PRODUCTION_PUBLISH_PROFILE. As credenciais do MongoDB devem ser configuradas como variáveis do App Service ou secret manager equivalente.")]
+# 2. Pipeline
+story += [P("2. Pipeline CI/CD", "H1x"),
+          P("Ferramenta: <b>GitHub Actions</b>, arquivo <b>.github/workflows/ci-cd.yml</b>. O workflow é acionado em pull requests e pushes nas branches develop, qa e main. Os jobs são encadeados por <b>needs</b>: nada é publicado se o build ou os testes falharem, e o mesmo artefato (imagem identificada pelo SHA do commit) é promovido para os ambientes.")]
+story.append(table([
+    ["Job", "Quando executa", "O que faz"],
+    ["Build e testes", "PR e push (develop, qa, main)", "Setup do .NET 8, restore, build Release, testes xUnit com cobertura e upload dos resultados (.trx) como artefato."],
+    ["Build e publicação da imagem", "push em qa ou main", "Login no GHCR com GITHUB_TOKEN, docker build multi-stage e push com as tags &lt;sha&gt; e &lt;branch&gt;-latest."],
+    ["Deploy staging", "push em qa", "azure/webapps-deploy atualiza o Web App de staging com a imagem do commit; em seguida, smoke test em /health e /api/alerts."],
+    ["Deploy production", "push em main", "Mesmo processo no Web App de produção (GitHub Environment production), com smoke test ao final."],
+], [3.6 * cm, 3.6 * cm, 10.4 * cm]))
+story += [P("Fluxo de promoção", "H2x"),
+          Preformatted("feature -> develop (build + testes)\n        -> qa      (build + testes -> imagem GHCR -> deploy staging    -> smoke test)\n        -> main    (build + testes -> imagem GHCR -> deploy production -> smoke test)", styles["Codex"]),
+          P("Segredos usados pelo pipeline (GitHub → Settings → Secrets): AZURE_WEBAPP_STAGING, AZURE_WEBAPP_STAGING_PUBLISH_PROFILE, AZURE_WEBAPP_PRODUCTION e AZURE_WEBAPP_PRODUCTION_PUBLISH_PROFILE. A string de conexão do banco fica somente nas configurações de cada Web App (MONGO_CONNECTION_STRING e MONGO_DATABASE), fora do repositório.")]
 
-# Docker
-story += [P("4. Containerização e orquestração", "H1x"), P("O Dockerfile utiliza uma estratégia multi-stage. A etapa de build contém o SDK completo apenas durante a compilação; a etapa final utiliza a imagem menor de runtime do ASP.NET Core. O processo reduz a superfície da imagem e evita transportar artefatos de desenvolvimento para execução.")]
-story.append(Preformatted("FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nRUN dotnet restore ...\nRUN dotnet publish ... --configuration Release\n\nFROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime\nEXPOSE 8080\nUSER app\nENTRYPOINT [\"dotnet\", \"OrbitaAlerta.Api.dll\"]", styles["Codex"]))
-story += [P("O Compose define API e MongoDB, configura a dependência pelo healthcheck e monta os volumes mongodb-data e mongodb-config. A rede orbita-alerta-network mantém a comunicação dos serviços isolada do restante do host.")]
-story.append(Preformatted("cp .env.example .env\ndocker compose up --build -d\ncurl http://localhost:8080/health\ndocker compose down", styles["Codex"]))
+# 3. Docker
+story += [P("3. Docker: arquitetura, comandos e imagem", "H1x"),
+          P("O Dockerfile usa build multi-stage: a imagem do SDK compila e publica; a imagem final contém apenas o runtime ASP.NET Core e os binários publicados, roda na porta 8080 e com o usuário não privilegiado <b>app</b>.")]
+story.append(Preformatted((ROOT / "Dockerfile").read_text(encoding="utf-8").strip(), styles["Codex"]))
+story += [P("Orquestração com Docker Compose", "H2x"),
+          bullet("<b>api</b>: build do Dockerfile, imagem orbita-alerta-api:local, porta ${API_PORT:-8080}, variáveis ASPNETCORE_ENVIRONMENT, MONGO_CONNECTION_STRING e MONGO_DATABASE, sobe somente após o MongoDB ficar saudável (depends_on + healthcheck)."),
+          bullet("<b>mongodb</b>: mongo:7.0 com usuário root definido por variáveis do .env e healthcheck via mongosh."),
+          bullet("<b>Volumes</b> nomeados orbita-alerta-mongodb-data e orbita-alerta-mongodb-config preservam os dados entre reinícios."),
+          bullet("<b>Rede</b> bridge orbita-alerta-network isola a comunicação entre API e banco."),
+          bullet("<b>.env.example</b> documenta as variáveis; o .env real não é versionado nem copiado para a imagem (.dockerignore).")]
+story += [P("Comandos utilizados", "H2x"),
+          Preformatted("Copy-Item .env.example .env\ndocker compose up --build -d\ndocker compose ps\nInvoke-RestMethod http://localhost:8080/health\ndocker compose logs -f api\ndocker compose down        # mantém o volume do MongoDB", styles["Codex"])]
+story += [P("Ambientes em nuvem (Azure for Students, capacidade mínima)", "H2x")]
+story.append(table([
+    ["Recurso", "Configuração"],
+    ["App Service Plan plan-orbita-alerta", "Linux, SKU F1 (gratuito), North Central US"],
+    ["Web App orbita-alerta-staging-mg", "Container da imagem GHCR, ASPNETCORE_ENVIRONMENT=Staging, banco orbita_alerta_staging"],
+    ["Web App orbita-alerta-production-mg", "Container da imagem GHCR, ASPNETCORE_ENVIRONMENT=Production, banco orbita_alerta_production"],
+    ["Cosmos DB orbita-alerta-cosmos-mg", "API MongoDB, free tier (1000 RU/s gratuitos), 400 RU/s por banco, South Africa North"],
+], [6 * cm, 11.6 * cm]))
+story.append(PageBreak())
 
-# Evidence
-story += [P("5. Evidências de execução", "H1x"), P("A entrega inclui o roteiro docs/evidencias/README.md. Ele orienta a captura de cinco evidências reais: build/testes, publicação no GHCR, deploy em staging, aprovação/deploy em produção e healthcheck do Compose.")]
-evidence_rows = [[P("Evidência", "Smallx"), P("Fonte", "Smallx"), P("Situação desta versão", "Smallx")], [P("Build e testes", "Bodyx"), P("GitHub Actions", "Bodyx"), P("Workflow configurado; capturar após execução.", "Bodyx")], [P("Imagem Docker", "Bodyx"), P("GHCR", "Bodyx"), P("Job configurado; capturar após publicação.", "Bodyx")], [P("Staging", "Bodyx"), P("Azure App Service", "Bodyx"), P("Deploy automatizado; requer Web App e secrets.", "Bodyx")], [P("Produção", "Bodyx"), P("Azure App Service", "Bodyx"), P("Deploy automatizado e protegido; requer aprovação.", "Bodyx")], [P("Execução local", "Bodyx"), P("Docker Compose", "Bodyx"), P("Comandos documentados; executar no host com Docker.", "Bodyx")]]
-story.append(table(evidence_rows, [4.1 * cm, 4.0 * cm, 7.4 * cm]))
-story.append(P("Importante: não foram incluídos prints falsos. O material entregue contém a implementação e o roteiro para anexar os prints após a execução no ambiente do grupo.", "Callout"))
+# 4. Prints do pipeline
+story += [P("4. Evidências: pipeline (build, testes e deploy)", "H1x"),
+          P("Todos os prints a seguir são capturas reais de janelas do Windows PowerShell executando os comandos no computador da integrante (script scripts/collect-evidence.ps1). As saídas em texto ficam em docs/evidencias/terminal.", "Smallx")]
+story += shot("01-dotnet-build", "Figura 1 — Restore e build Release da API.")
+story += shot("02-dotnet-test", "Figura 2 — Testes automatizados xUnit: 3 de 3 aprovados.")
+story += shot("10-github-actions", "Figura 3 — Execuções do workflow no GitHub Actions e status de cada job por branch (qa → staging, main → produção).")
+story += shot("11-github-actions-web", "Figura 3b — Página pública do último run no GitHub Actions.")
+story += shot("03-docker-compose-up", "Figura 4 — Build da imagem multi-stage e subida dos containers com Docker Compose.")
+story += shot("04-docker-compose-ps", "Figura 5 — Containers em execução, imagem criada, volumes e rede.")
+story += shot("05-local-api", "Figura 6 — API local: healthcheck, criação e listagem de alertas.")
+story += shot("06-local-logs", "Figura 7 — Logs do container da API.")
 
-# Challenges
-story += [P("6. Desafios encontrados e soluções", "H1x"), bullet("Ausência de infraestrutura externa no momento da preparação: a solução foi parametrizada para receber nomes de Web Apps, publish profiles e conexão MongoDB por secrets/variáveis, sem expor credenciais."), bullet("Necessidade de separar qualidade de promoção: o pipeline usa jobs dependentes e só publica imagem/deploy em branches de ambiente."), bullet("Persistência em ambiente local: o Compose utiliza volumes nomeados, enquanto a aplicação recebe a conexão por variável de ambiente."), bullet("Segurança mínima do container: a imagem de runtime utiliza o usuário não privilegiado app e não incorpora o arquivo .env.")]
+# 5. Staging e produção
+story += [PageBreak(), P("5. Evidências: ambientes staging e produção", "H1x")]
+story += shot("07-azure-recursos", "Figura 8 — Recursos Azure: Web Apps de staging e produção em execução, plano F1 e Cosmos DB free tier.")
+story += shot("08-staging", "Figura 9 — Staging (orbita-alerta-staging-mg.azurewebsites.net): /health com environment=Staging, POST e GET de alertas.")
+story += shot("09-production", "Figura 10 — Produção (orbita-alerta-production-mg.azurewebsites.net): /health com environment=Production, POST e GET de alertas.")
 
-# Checklist
-story += [P("7. Checklist de entrega", "H1x")]
-check_rows = [[P("Item", "Smallx"), P("OK", "Smallx"), P("Observação", "Smallx")], [P("Projeto compactado em ZIP", "Bodyx"), P("☑", "Bodyx"), P("Pacote com estrutura organizada.", "Bodyx")], [P("Dockerfile funcional", "Bodyx"), P("☑", "Bodyx"), P("Build multi-stage para .NET 8.", "Bodyx")], [P("docker-compose.yml", "Bodyx"), P("☑", "Bodyx"), P("API + MongoDB, volumes, rede e healthcheck.", "Bodyx")], [P("Pipeline build/test/deploy", "Bodyx"), P("☑", "Bodyx"), P("GitHub Actions para staging e produção.", "Bodyx")], [P("README com instruções", "Bodyx"), P("☑", "Bodyx"), P("Inclui comandos, tecnologias e checklist.", "Bodyx")], [P("Documentação técnica", "Bodyx"), P("☑", "Bodyx"), P("Este PDF.", "Bodyx")], [P("Deploy realizado em staging e produção", "Bodyx"), P("☐", "Bodyx"), P("Pendente de execução nas contas externas; automação está pronta.", "Bodyx")]]
-story.append(table(check_rows, [7.0 * cm, 1.5 * cm, 7.0 * cm]))
-story += [Spacer(1, 10), P("Conclusão", "H2x"), P("A entrega consolida os principais conceitos da fase DevOps: integração contínua, testes automatizados, empacotamento reproduzível, containerização, orquestração local e promoção controlada entre ambientes. Para concluir a última linha do checklist, basta conectar o repositório aos recursos Azure, cadastrar os secrets e executar o workflow nas branches qa e main.")]
+# 6. Desafios
+story += [PageBreak(), P("6. Desafios encontrados e soluções", "H1x")]
+story.append(table([
+    ["Desafio", "Solução"],
+    ["Primeiro deploy de produção falhou com “No credentials found”: o workflow dependia de secrets ainda não cadastrados e a branch qa não existia.", "Criação dos Web Apps, habilitação das credenciais de publicação (basic auth do SCM), cadastro dos publish profiles como secrets e criação da branch qa para o fluxo de staging."],
+    ["A assinatura Azure for Students só permite 5 regiões; o Cosmos DB herdava a região do resource group (eastus) e era bloqueado pela política.", "Resource group dedicado ao banco, criado em uma região permitida."],
+    ["North Central US sem capacidade para novas contas Cosmos DB no momento da criação.", "Banco criado em South Africa North; a API acessa o banco pela string de conexão, independente da região."],
+    ["O MongoDB local (Docker Desktop) não é acessível pelos ambientes em nuvem.", "Cosmos DB com API MongoDB no free tier, um banco por ambiente (orbita_alerta_staging e orbita_alerta_production)."],
+    ["GET /api/alerts retornava HTTP 500 no Azure: o Cosmos DB só ordena por campos indexados (no MongoDB local o índice é opcional).", "A aplicação passou a criar o índice CreatedAt na inicialização (MongoAlertRepository) e o índice foi criado nas collections existentes."],
+    ["Manter custo zero e não expor credenciais.", "Plano F1 gratuito, Cosmos free tier, segredos somente em GitHub Secrets e nas configurações do App Service; .env e publish profiles no .gitignore."],
+], [8.3 * cm, 9.3 * cm]))
 
+# 7. Checklist
+story += [Spacer(1, 10), P("7. Checklist de entrega", "H1x")]
+story.append(table([
+    ["Item", "OK", "Observação"],
+    ["Projeto compactado em .ZIP com estrutura organizada", check(True), "Dockerfile, docker-compose.yml, src/, tests/, scripts/, docs/, README.md, .env.example e .github/workflows/."],
+    ["Dockerfile funcional", check(True), "Multi-stage .NET 8, usuário não privilegiado (Figura 4)."],
+    ["docker-compose.yml ou arquivos Kubernetes", check(True), "API + MongoDB com volumes, variáveis de ambiente, rede e healthcheck (Figura 5)."],
+    ["Pipeline com etapas de build, teste e deploy", check(True), "GitHub Actions: build, testes, imagem GHCR e deploy (Figura 3)."],
+    ["README.md com instruções e prints", check(True), "Execução local, pipeline, containerização, prints e tecnologias."],
+    ["Documentação técnica com evidências (PDF ou PPT)", check(True), "Este PDF."],
+    ["Deploy realizado nos ambientes staging e produção", check(deploy_ok),
+     "Deploy pelo pipeline concluído em staging e produção (Figuras 3, 9 e 10)." if deploy_ok else
+     "Ambientes no ar e respondendo (Figuras 8 a 10); job de deploy do pipeline aguardando o cadastro dos secrets do Azure."],
+], [6.4 * cm, 1.2 * cm, 10 * cm]))
 
-doc = BaseDocTemplate(OUT, pagesize=A4, leftMargin=1.7 * cm, rightMargin=1.7 * cm, topMargin=1.6 * cm, bottomMargin=1.8 * cm, title="Órbita Alerta - Documentação DevOps", author="Micaela Guimarães")
-frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="normal")
-doc.addPageTemplates([PageTemplate(id="main", frames=frame, onPage=NumberedCanvasMixin().on_page)])
+doc = BaseDocTemplate(str(OUT), pagesize=A4, leftMargin=1.7 * cm, rightMargin=1.7 * cm, topMargin=1.6 * cm, bottomMargin=1.8 * cm,
+                      title="Órbita Alerta - Documentação DevOps", author="Micaela Guimarães")
+doc.addPageTemplates([PageTemplate(id="main", frames=Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="normal"), onPage=on_page)])
 doc.build(story)
 print(OUT)

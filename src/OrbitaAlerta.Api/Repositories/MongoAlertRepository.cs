@@ -11,6 +11,9 @@ public sealed class MongoAlertRepository : IAlertRepository
     {
         var databaseName = configuration["MONGO_DATABASE"] ?? "orbita_alerta_esg";
         _collection = client.GetDatabase(databaseName).GetCollection<Alert>("alerts");
+
+        _collection.Indexes.CreateOne(new CreateIndexModel<Alert>(
+            Builders<Alert>.IndexKeys.Descending(alert => alert.CreatedAt)));
     }
 
     public async Task<IReadOnlyList<Alert>> GetAllAsync(CancellationToken cancellationToken) =>
