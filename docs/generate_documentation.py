@@ -3,7 +3,6 @@
 Uso (na raiz do projeto): python docs/generate_documentation.py
 Os prints são gerados antes por: powershell -ExecutionPolicy Bypass -File scripts/collect-evidence.ps1
 """
-import datetime
 import os
 from pathlib import Path
 
@@ -109,7 +108,6 @@ def check(ok):
 
 staging_ok, production_ok = pipeline_status()
 deploy_ok = staging_ok and production_ok
-today = datetime.date.today().strftime("%d/%m/%Y")
 story = []
 
 # Capa
@@ -122,7 +120,7 @@ story.append(table([
     ["Produção", "https://orbita-alerta-production-mg.azurewebsites.net"],
     ["Stack", "C# / .NET 8, MongoDB, Docker, Docker Compose, GitHub Actions, GHCR, Azure App Service e Azure Cosmos DB (API MongoDB)"],
 ], [3.2 * cm, 14.4 * cm], header=False))
-story += [Spacer(1, 1 * cm), P(f"Documento gerado em {today}", "Smallx"), PageBreak()]
+story.append(PageBreak())
 
 # 1. Contexto
 story += [P("1. Contexto e objetivo", "H1x"),
@@ -166,8 +164,7 @@ story.append(table([
 story.append(PageBreak())
 
 # 4. Prints do pipeline
-story += [P("4. Evidências: pipeline (build, testes e deploy)", "H1x"),
-          P("Os prints de terminal são capturas reais de janelas do Windows PowerShell executando os comandos no computador da integrante (script scripts/collect-evidence.ps1); as saídas em texto ficam em docs/evidencias/terminal. Os prints do GitHub foram capturados na interface web do repositório.", "Smallx")]
+story += [P("4. Evidências: pipeline (build, testes e deploy)", "H1x")]
 story += shot("01-dotnet-build", "Figura 1 — Restore e build Release da API.")
 story += shot("02-dotnet-test", "Figura 2 — Testes automatizados xUnit: 3 de 3 aprovados.")
 story += shot("10-github-run-staging", "Figura 3 — GitHub Actions, run #4 (branch qa): build e testes, publicação da imagem e Deploy staging concluídos com sucesso.")
