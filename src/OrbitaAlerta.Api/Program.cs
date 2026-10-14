@@ -12,6 +12,15 @@ builder.Services.AddSingleton<IAlertRepository, MongoAlertRepository>();
 
 var app = builder.Build();
 
+app.MapGet("/", (IHostEnvironment environment) =>
+    Results.Ok(new
+    {
+        service = "orbita-alerta-api",
+        project = "Cidades ESG Inteligentes - Órbita Alerta",
+        environment = environment.EnvironmentName,
+        endpoints = new[] { "GET /health", "GET /api/alerts", "POST /api/alerts" }
+    }));
+
 app.MapGet("/health", (IHostEnvironment environment) =>
     Results.Ok(new
     {
