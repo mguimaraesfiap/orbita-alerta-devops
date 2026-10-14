@@ -114,7 +114,7 @@ Estratégias adotadas:
 
 ## Prints do funcionamento
 
-Capturas reais de janelas do Windows PowerShell, geradas por [scripts/collect-evidence.ps1](scripts/collect-evidence.ps1). As saídas em texto estão em [docs/evidencias/terminal](docs/evidencias/terminal).
+Prints de terminal: capturas reais de janelas do Windows PowerShell, geradas por [scripts/collect-evidence.ps1](scripts/collect-evidence.ps1). As saídas em texto estão em [docs/evidencias/terminal](docs/evidencias/terminal).
 
 ### Build e testes
 
@@ -123,8 +123,16 @@ Capturas reais de janelas do Windows PowerShell, geradas por [scripts/collect-ev
 
 ### Pipeline no GitHub Actions
 
-![GitHub Actions](docs/evidencias/prints/10-github-actions.png)
-![GitHub Actions - página do run](docs/evidencias/prints/11-github-actions-web.png)
+Run #4 (branch `qa`): deploy em **staging** concluído.
+
+![Run staging](docs/evidencias/prints/10-github-run-staging.png)
+
+Run #5 (branch `main`): deploy em **produção** concluído.
+
+![Run produção](docs/evidencias/prints/11-github-run-production.png)
+
+Secrets do Azure cadastrados no repositório:
+
 ![Secrets do repositório](docs/evidencias/prints/12-github-secrets.png)
 
 ### Docker Compose
@@ -184,7 +192,7 @@ orbita-alerta-devops/
 | Pipeline com etapas de build, teste e deploy | ☑ |
 | README.md com instruções e prints | ☑ |
 | Documentação técnica com evidências (PDF ou PPT) | ☑ |
-| Deploy realizado nos ambientes staging e produção | ☐ |
+| Deploy realizado nos ambientes staging e produção | ☑ |
 
 ## Autoria
 

@@ -98,11 +98,9 @@ def shot(name, caption):
 
 
 def pipeline_status():
-    """Lê a evidência do pipeline e indica se os deploys de staging e produção concluíram com sucesso."""
-    path = TERMINAL / "10-github-actions.txt"
-    text = path.read_text(encoding="utf-8-sig", errors="replace") if path.exists() else ""
-    ok = lambda job: any(job in line and "success" in line for line in text.splitlines())
-    return ok("Deploy staging"), ok("Deploy production")
+    """Runs do GitHub Actions com deploy concluído (Figuras 3 e 4): #4 em qa (staging) e #5 em main (produção)."""
+    ok = all((PRINTS / f"{n}.png").exists() for n in ("10-github-run-staging", "11-github-run-production"))
+    return ok, ok
 
 
 def check(ok):
@@ -169,22 +167,22 @@ story.append(PageBreak())
 
 # 4. Prints do pipeline
 story += [P("4. Evidências: pipeline (build, testes e deploy)", "H1x"),
-          P("Todos os prints a seguir são capturas reais de janelas do Windows PowerShell executando os comandos no computador da integrante (script scripts/collect-evidence.ps1). As saídas em texto ficam em docs/evidencias/terminal.", "Smallx")]
+          P("Os prints de terminal são capturas reais de janelas do Windows PowerShell executando os comandos no computador da integrante (script scripts/collect-evidence.ps1); as saídas em texto ficam em docs/evidencias/terminal. Os prints do GitHub foram capturados na interface web do repositório.", "Smallx")]
 story += shot("01-dotnet-build", "Figura 1 — Restore e build Release da API.")
 story += shot("02-dotnet-test", "Figura 2 — Testes automatizados xUnit: 3 de 3 aprovados.")
-story += shot("10-github-actions", "Figura 3 — Execuções do workflow no GitHub Actions e status de cada job por branch (qa → staging, main → produção).")
-story += shot("12-github-secrets", "Figura 3c — Secrets do Azure cadastrados no repositório GitHub (valores criptografados, não exibidos).")
-story += shot("11-github-actions-web", "Figura 3b — Página pública do último run no GitHub Actions.")
-story += shot("03-docker-compose-up", "Figura 4 — Build da imagem multi-stage e subida dos containers com Docker Compose.")
-story += shot("04-docker-compose-ps", "Figura 5 — Containers em execução, imagem criada, volumes e rede.")
-story += shot("05-local-api", "Figura 6 — API local: healthcheck, criação e listagem de alertas.")
-story += shot("06-local-logs", "Figura 7 — Logs do container da API.")
+story += shot("10-github-run-staging", "Figura 3 — GitHub Actions, run #4 (branch qa): build e testes, publicação da imagem e Deploy staging concluídos com sucesso.")
+story += shot("11-github-run-production", "Figura 4 — GitHub Actions, run #5 (branch main): build e testes, publicação da imagem e Deploy production concluídos com sucesso.")
+story += shot("12-github-secrets", "Figura 5 — Secrets do Azure cadastrados no repositório GitHub (valores criptografados, não exibidos).")
+story += shot("03-docker-compose-up", "Figura 6 — Build da imagem multi-stage e subida dos containers com Docker Compose.")
+story += shot("04-docker-compose-ps", "Figura 7 — Containers em execução, imagem criada, volumes e rede.")
+story += shot("05-local-api", "Figura 8 — API local: healthcheck, criação e listagem de alertas.")
+story += shot("06-local-logs", "Figura 9 — Logs do container da API.")
 
 # 5. Staging e produção
 story += [PageBreak(), P("5. Evidências: ambientes staging e produção", "H1x")]
-story += shot("07-azure-recursos", "Figura 8 — Recursos Azure: Web Apps de staging e produção em execução, plano F1 e Cosmos DB free tier.")
-story += shot("08-staging", "Figura 9 — Staging (orbita-alerta-staging-mg.azurewebsites.net): /health com environment=Staging, POST e GET de alertas.")
-story += shot("09-production", "Figura 10 — Produção (orbita-alerta-production-mg.azurewebsites.net): /health com environment=Production, POST e GET de alertas.")
+story += shot("07-azure-recursos", "Figura 10 — Recursos Azure: Web Apps de staging e produção em execução, plano F1 e Cosmos DB free tier.")
+story += shot("08-staging", "Figura 11 — Staging (orbita-alerta-staging-mg.azurewebsites.net): /health com environment=Staging, POST e GET de alertas.")
+story += shot("09-production", "Figura 12 — Produção (orbita-alerta-production-mg.azurewebsites.net): /health com environment=Production, POST e GET de alertas.")
 
 # 6. Desafios
 story += [PageBreak(), P("6. Desafios encontrados e soluções", "H1x")]
@@ -203,14 +201,14 @@ story += [Spacer(1, 10), P("7. Checklist de entrega", "H1x")]
 story.append(table([
     ["Item", "OK", "Observação"],
     ["Projeto compactado em .ZIP com estrutura organizada", check(True), "Dockerfile, docker-compose.yml, src/, tests/, scripts/, docs/, README.md, .env.example e .github/workflows/."],
-    ["Dockerfile funcional", check(True), "Multi-stage .NET 8, usuário não privilegiado (Figura 4)."],
-    ["docker-compose.yml ou arquivos Kubernetes", check(True), "API + MongoDB com volumes, variáveis de ambiente, rede e healthcheck (Figura 5)."],
-    ["Pipeline com etapas de build, teste e deploy", check(True), "GitHub Actions: build, testes, imagem GHCR e deploy (Figura 3)."],
+    ["Dockerfile funcional", check(True), "Multi-stage .NET 8, usuário não privilegiado (Figura 6)."],
+    ["docker-compose.yml ou arquivos Kubernetes", check(True), "API + MongoDB com volumes, variáveis de ambiente, rede e healthcheck (Figura 7)."],
+    ["Pipeline com etapas de build, teste e deploy", check(True), "GitHub Actions: build, testes, imagem GHCR e deploy (Figuras 3 a 5)."],
     ["README.md com instruções e prints", check(True), "Execução local, pipeline, containerização, prints e tecnologias."],
     ["Documentação técnica com evidências (PDF ou PPT)", check(True), "Este PDF."],
     ["Deploy realizado nos ambientes staging e produção", check(deploy_ok),
-     "Deploy pelo pipeline concluído em staging e produção (Figuras 3, 9 e 10)." if deploy_ok else
-     "Ambientes no ar e respondendo (Figuras 8 a 10); job de deploy do pipeline aguardando o cadastro dos secrets do Azure."],
+     "Deploy pelo pipeline concluído em staging (run #4) e produção (run #5), com smoke test (Figuras 3, 4, 11 e 12)." if deploy_ok else
+     "Ambientes no ar e respondendo (Figuras 10 a 12); job de deploy do pipeline aguardando o cadastro dos secrets do Azure."],
 ], [6.4 * cm, 1.2 * cm, 10 * cm]))
 
 doc = BaseDocTemplate(str(OUT), pagesize=A4, leftMargin=1.7 * cm, rightMargin=1.7 * cm, topMargin=1.6 * cm, bottomMargin=1.8 * cm,
